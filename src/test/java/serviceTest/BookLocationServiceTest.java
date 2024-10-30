@@ -2,7 +2,6 @@ package serviceTest;
 
 import exception.DatabaseOperationException;
 import exception.InvalidDataException;
-import model.Book;
 import model.BookLocation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,16 +61,6 @@ public class BookLocationServiceTest {
         assertTrue(duplicateLocationId.isEmpty(), "Duplicate location should not be added.");
     }
 
-    // Test for checking if a book location exists
-    @Test
-    public void testDoesBookLocationExist() throws DatabaseOperationException, InvalidDataException {
-        BookLocation location = new BookLocation("A", 1);
-        bookLocationService.addLocation(location);
-
-        Optional<Integer> locationId = bookLocationService.doesBookLocationExist("A", 1);
-        assertTrue(locationId.isPresent(), "Book location should exist in the database.");
-    }
-
     // Test for fetching all book locations
     @Test
     public void testGetAllBookLocations() throws DatabaseOperationException, InvalidDataException {
@@ -83,23 +72,6 @@ public class BookLocationServiceTest {
 
         List<BookLocation> allLocations = bookLocationService.getAllBookLocations();
         assertEquals(2, allLocations.size(), "There should be 2 book locations in the database.");
-    }
-
-    // Test for fetching a book location by its shelf location ID
-    @Test
-    public void testGetLocationByBookShelfLocationID() throws DatabaseOperationException, InvalidDataException {
-        BookLocation location = new BookLocation("A", 1);
-        Optional<Integer> locationId = bookLocationService.addLocation(location);
-
-        assertTrue(locationId.isPresent(), "Location ID should be generated.");
-
-        BookLocation locationWithId = new BookLocation(locationId.get(), location.getSection(), location.getShelf());
-        Book book = new Book("Effective Java", "Joshua Bloch", 2008, 5, locationWithId);
-
-        Optional<BookLocation> fetchedLocation = bookLocationService.getLocationByBookShelfLocationID(book);
-        assertTrue(fetchedLocation.isPresent(), "Book location should be found.");
-        assertEquals("A", fetchedLocation.get().getSection(), "Section should be 'A'.");
-        assertEquals(1, fetchedLocation.get().getShelf(), "Shelf should be 1.");
     }
 
     // Test for removing a book location

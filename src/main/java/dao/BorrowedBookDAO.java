@@ -76,8 +76,8 @@ public class BorrowedBookDAO {
         String query = "SELECT bb.id FROM borrowed_books bb "+
                 "JOIN readers r ON bb.reader_id = r.id "+
                 "JOIN books b ON bb.book_id = b.id "+
-                "WHERE r.first_name = ? AND r.last_name = ? AND r.date_of_birth = ? "+
-                "AND b.title = ? AND b.author = ? AND b.year_of_publication = ? ";
+                "WHERE LOWER(r.first_name) = LOWER(?) AND LOWER(r.last_name) = LOWER(?) AND r.date_of_birth = ? "+
+                "AND LOWER(b.title) = LOWER(?) AND LOWER(b.author) = LOWER(?) AND b.year_of_publication = ? ";
 
         try(PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, reader.getFirstName());
@@ -105,7 +105,7 @@ public class BorrowedBookDAO {
                 "FROM borrowed_books bb "+
                 "JOIN books b ON bb.book_id = b.id "+
                 "JOIN readers r ON bb.reader_id = r.id "+
-                "WHERE r.first_name = ? AND r.last_name = ? AND r.date_of_birth = ?";
+                "WHERE LOWER(r.first_name) = LOWER(?) AND LOWER(r.last_name) = LOWER(?) AND r.date_of_birth = ?";
 
         List<String> borrowedBooksInfo = new ArrayList<>();
 
@@ -167,7 +167,7 @@ public class BorrowedBookDAO {
     public boolean hasOverdueLoans(Reader reader) throws DatabaseOperationException {
         String query = "SELECT bb.id FROM borrowed_books bb " +
                 "JOIN readers r ON bb.reader_id = r.id " +
-                "WHERE r.first_name = ? AND r.last_name = ? AND r.date_of_birth = ? " +
+                "WHERE LOWER(r.first_name) = LOWER(?) AND LOWER(r.last_name) = LOWER(?) AND r.date_of_birth = ? " +
                 "AND bb.return_due_date < CURRENT_DATE";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {

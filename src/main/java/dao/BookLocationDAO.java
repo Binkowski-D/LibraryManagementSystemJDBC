@@ -1,7 +1,6 @@
 package dao;
 
 import exception.DatabaseOperationException;
-import model.Book;
 import model.BookLocation;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -84,30 +83,6 @@ public class BookLocationDAO {
                 return allBooks;
             }
 
-        } catch (SQLException e) {
-            throw new DatabaseOperationException("Database operation failed", e);
-        }
-    }
-
-    // Method to fetch the location of a book by its shelfLocationID using a Book object
-    public Optional<BookLocation> getLocationByBookShelfLocationID(Book book) throws DatabaseOperationException {
-        String query = "SELECT section, shelf FROM book_shelf_location WHERE id = ?";
-
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, book.getLocation().getId());
-
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    BookLocation bookLocation = new BookLocation(
-                            resultSet.getString("section"),
-                            resultSet.getInt("shelf")
-                    );
-
-                    return Optional.of(bookLocation);
-                } else {
-                    return Optional.empty();
-                }
-            }
         } catch (SQLException e) {
             throw new DatabaseOperationException("Database operation failed", e);
         }

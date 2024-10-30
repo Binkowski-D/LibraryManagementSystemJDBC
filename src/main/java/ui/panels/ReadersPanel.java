@@ -6,6 +6,7 @@ import ui.MainWindow;
 import ui.util.BackgroundPanel;
 
 import javax.swing.*;
+import java.awt.*;
 import java.sql.Connection;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -129,7 +130,7 @@ public class ReadersPanel extends BackgroundPanel {
         JFrame frame = new JFrame("All Readers");
         frame.setSize(600, 400);
         frame.setLocationRelativeTo(null);
-        frame.setLayout(null);
+        frame.setLayout(new BorderLayout());
 
         ImageIcon icon = new ImageIcon(MainWindow.class.getResource("/images/icon.png"));
         frame.setIconImage(icon.getImage());
@@ -150,8 +151,7 @@ public class ReadersPanel extends BackgroundPanel {
 
             JTable table = new JTable(data, columnNames);
             JScrollPane scrollPane = new JScrollPane(table);
-            scrollPane.setBounds(50, 50, 500, 300);
-            frame.add(scrollPane);
+            frame.add(scrollPane, BorderLayout.CENTER);
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(frame, "Failed to fetch readers: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -194,6 +194,7 @@ public class ReadersPanel extends BackgroundPanel {
                     JFrame resultsFrame = new JFrame("Readers with Last Name: " + lastName);
                     resultsFrame.setSize(600, 400);
                     resultsFrame.setLocationRelativeTo(null);
+                    resultsFrame.setLayout(new BorderLayout());
 
                     resultsFrame.setIconImage(icon.getImage());
 
@@ -210,8 +211,7 @@ public class ReadersPanel extends BackgroundPanel {
 
                     JTable table = new JTable(data, columnNames);
                     JScrollPane scrollPane = new JScrollPane(table);
-                    scrollPane.setBounds(50, 50, 500, 300);
-                    resultsFrame.add(scrollPane);
+                    resultsFrame.add(scrollPane, BorderLayout.CENTER);
 
                     resultsFrame.setVisible(true);
                 }
@@ -267,21 +267,30 @@ public class ReadersPanel extends BackgroundPanel {
             String lastName = lastNameField.getText();
             String dobString = dobField.getText();
 
-            try {
-                LocalDate dob = LocalDate.parse(dobString);
-                boolean result = readerService.removeReaderByDetails(firstName, lastName, dob);
+            int confirmation = JOptionPane.showConfirmDialog(
+                    frame,
+                    "Are you sure you want to remove this reader?",
+                    "Confirmation",
+                    JOptionPane.YES_NO_OPTION
+            );
 
-                if (result) {
-                    JOptionPane.showMessageDialog(frame, "Reader removed successfully.");
-                } else {
-                    JOptionPane.showMessageDialog(frame, "Reader not found or could not be removed.", "Error", JOptionPane.ERROR_MESSAGE);
+            if(confirmation == JOptionPane.YES_OPTION) {
+                try {
+                    LocalDate dob = LocalDate.parse(dobString);
+                    boolean result = readerService.removeReaderByDetails(firstName, lastName, dob);
+
+                    if (result) {
+                        JOptionPane.showMessageDialog(frame, "Reader removed successfully.");
+                    } else {
+                        JOptionPane.showMessageDialog(frame, "Reader not found or could not be removed.", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                    frame.dispose();
+
+                } catch (DateTimeParseException dtpe) {
+                    JOptionPane.showMessageDialog(frame, "Invalid date format. Use YYYY-MM-DD.", "Error", JOptionPane.ERROR_MESSAGE);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(frame, "Failed to remove reader: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
-                frame.dispose();
-
-            } catch (DateTimeParseException dtpe) {
-                JOptionPane.showMessageDialog(frame, "Invalid date format. Use YYYY-MM-DD.", "Error", JOptionPane.ERROR_MESSAGE);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(frame, "Failed to remove reader: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 

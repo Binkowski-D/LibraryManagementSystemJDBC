@@ -96,7 +96,7 @@ public class BookDAO {
 
     // Fetches all books from the database along with their location data
     public List<Book> getAllBooks() throws DatabaseOperationException {
-        String query = "SELECT b.id, b.title, b.author, b.year_of_publication, b.quantity, l.section, l.shelf " +
+        String query = "SELECT b.id, b.title, b.author, b.year_of_publication, b.quantity, b.shelf_location_id,  l.section, l.shelf " +
                 "FROM books b " +
                 "JOIN book_shelf_location l ON b.shelf_location_id = l.id " +
                 "ORDER BY b.title, b.author";
@@ -106,7 +106,7 @@ public class BookDAO {
              ResultSet resultSet = statement.executeQuery()) {
 
             while (resultSet.next()) {
-                BookLocation location = new BookLocation(resultSet.getString("section"), resultSet.getInt("shelf"));
+                BookLocation location = new BookLocation(resultSet.getInt("shelf_location_id"), resultSet.getString("section"), resultSet.getInt("shelf"));
                 Book book = new Book(resultSet.getInt("id"),
                         resultSet.getString("title"),
                         resultSet.getString("author"),
@@ -126,10 +126,10 @@ public class BookDAO {
 
     // Fetches books by title from the database along with location data
     public List<Book> getBooksByTitle(String title) throws DatabaseOperationException {
-        String query = "SELECT b.id, b.title, b.author, b.year_of_publication, b.quantity, l.section, l.shelf " +
+        String query = "SELECT b.id, b.title, b.author, b.year_of_publication, b.quantity, b.shelf_location_id,  l.section, l.shelf " +
                 "FROM books b " +
                 "JOIN book_shelf_location l ON b.shelf_location_id = l.id " +
-                "WHERE b.title = ? " +
+                "WHERE LOWER(b.title) = LOWER(?) " +
                 "ORDER BY b.title, b.author";
         List<Book> allBooks = new ArrayList<>();
 
@@ -138,7 +138,7 @@ public class BookDAO {
 
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
-                    BookLocation location = new BookLocation(resultSet.getString("section"), resultSet.getInt("shelf"));
+                    BookLocation location = new BookLocation(resultSet.getInt("shelf_location_id"), resultSet.getString("section"), resultSet.getInt("shelf"));
                     Book book = new Book(resultSet.getInt("id"),
                             resultSet.getString("title"),
                             resultSet.getString("author"),
@@ -159,10 +159,10 @@ public class BookDAO {
 
     // Fetches books by author from the database along with location data
     public List<Book> getBooksByAuthor(String author) throws DatabaseOperationException {
-        String query = "SELECT b.id, b.title, b.author, b.year_of_publication, b.quantity, l.section, l.shelf " +
+        String query = "SELECT b.id, b.title, b.author, b.year_of_publication, b.quantity, b.shelf_location_id, l.section, l.shelf " +
                 "FROM books b " +
                 "JOIN book_shelf_location l ON b.shelf_location_id = l.id " +
-                "WHERE b.author = ? " +
+                "WHERE LOWER(b.author) = LOWER(?) " +
                 "ORDER BY b.title, b.author";
         List<Book> allBooks = new ArrayList<>();
 
@@ -171,7 +171,7 @@ public class BookDAO {
 
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
-                    BookLocation location = new BookLocation(resultSet.getString("section"), resultSet.getInt("shelf"));
+                    BookLocation location = new BookLocation(resultSet.getInt("shelf_location_id"), resultSet.getString("section"), resultSet.getInt("shelf"));
                     Book book = new Book(resultSet.getInt("id"),
                             resultSet.getString("title"),
                             resultSet.getString("author"),
@@ -192,10 +192,10 @@ public class BookDAO {
 
     // Fetches book by author, title, and year of publication along with location data
     public Optional<Book> findBookByDetails(String title, String author, int yearOfPublication) throws DatabaseOperationException {
-        String query = "SELECT b.id, b.title, b.author, b.year_of_publication, b.quantity, l.section, l.shelf " +
+        String query = "SELECT b.id, b.title, b.author, b.year_of_publication, b.quantity, b.shelf_location_id, l.section, l.shelf " +
                 "FROM books b " +
                 "JOIN book_shelf_location l ON b.shelf_location_id = l.id " +
-                "WHERE b.title = ? AND b.author = ? AND b.year_of_publication = ? " +
+                "WHERE LOWER(b.title) = LOWER(?) AND LOWER(b.author) = LOWER(?) AND b.year_of_publication = ? " +
                 "ORDER BY b.title, b.author";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -205,7 +205,7 @@ public class BookDAO {
 
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
-                    BookLocation location = new BookLocation(resultSet.getString("section"), resultSet.getInt("shelf"));
+                    BookLocation location = new BookLocation(resultSet.getInt("shelf_location_id"), resultSet.getString("section"), resultSet.getInt("shelf"));
                     Book book = new Book(resultSet.getInt("id"),
                             resultSet.getString("title"),
                             resultSet.getString("author"),
@@ -224,7 +224,7 @@ public class BookDAO {
 
     // Helper method to check if a book exists and return its ID
     private Optional<Integer> findBookIdByDetails(String title, String author, int yearOfPublication) throws SQLException {
-        String query = "SELECT id FROM books WHERE title = ? AND author = ? AND year_of_publication = ?";
+        String query = "SELECT id FROM books WHERE LOWER(title) = LOWER(?) AND LOWER(author) = LOWER(?) AND year_of_publication = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, title);
             statement.setString(2, author);

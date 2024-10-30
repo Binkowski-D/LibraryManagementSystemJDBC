@@ -86,7 +86,7 @@ public class MainWindow {
         ImageIcon icon = new ImageIcon(MainWindow.class.getResource("/images/icon.png"));
         booksFrame.setIconImage(icon.getImage());
 
-        BooksPanel booksPanel = new BooksPanel("/images/background.png");
+        BooksPanel booksPanel = new BooksPanel("/images/background.png", connection);
         booksPanel.setLayout(null);
         booksFrame.setContentPane(booksPanel);
 
@@ -134,7 +134,7 @@ public class MainWindow {
         ImageIcon icon = new ImageIcon(MainWindow.class.getResource("/images/icon.png"));
         bookLocationsFrame.setIconImage(icon.getImage());
 
-        BookLocationsPanel bookLocationsPanel = new BookLocationsPanel("/images/background.png");
+        BookLocationsPanel bookLocationsPanel = new BookLocationsPanel("/images/background.png", connection);
         bookLocationsPanel.setLayout(null);
         bookLocationsFrame.setContentPane(bookLocationsPanel);
 
@@ -158,7 +158,7 @@ public class MainWindow {
         ImageIcon icon = new ImageIcon(MainWindow.class.getResource("/images/icon.png"));
         borrowsAndReturnsFrame.setIconImage(icon.getImage());
 
-        BorrowedBookPanel borrowsAndReturnsPanel = new BorrowedBookPanel("/images/background.png");
+        BorrowedBookPanel borrowsAndReturnsPanel = new BorrowedBookPanel("/images/background.png", connection);
         borrowsAndReturnsPanel.setLayout(null);
         borrowsAndReturnsFrame.setContentPane(borrowsAndReturnsPanel);
 

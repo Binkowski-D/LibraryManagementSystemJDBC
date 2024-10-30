@@ -3,7 +3,6 @@ package service;
 import dao.BookLocationDAO;
 import exception.DatabaseOperationException;
 import exception.InvalidDataException;
-import model.Book;
 import model.BookLocation;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -97,28 +96,6 @@ public class BookLocationService {
         }
     }
 
-    // Fetches the book location of a book by its shelfLocationID using a Book object
-    public Optional<BookLocation> getLocationByBookShelfLocationID(Book book) throws DatabaseOperationException, InvalidDataException {
-        int shelfLocationId = book.getLocation().getId();
-        logger.info("Searching for book location with shelf location ID: " + shelfLocationId);
-
-        // Validate book's shelf location before proceeding
-        validateShelfLocationId(shelfLocationId);
-
-        try{
-            Optional<BookLocation> bookLocation = bookLocationDao.getLocationByBookShelfLocationID(book);
-            if(bookLocation.isEmpty()){
-                logger.info("No location found with shelf location ID: " + shelfLocationId);
-            }else{
-                logger.info("Book location found with section: " + bookLocation.get().getSection() + " and shelf: " + bookLocation.get().getShelf());
-            }
-            return bookLocation;
-        }catch (DatabaseOperationException e) {
-            logger.log(Level.SEVERE, "Error while fetching book location with book's shelf location ID: " + shelfLocationId, e);
-            throw new DatabaseOperationException("Failed to fetch book location with book's shelf locatio ID: " + shelfLocationId, e);
-        }
-    }
-
     // Removes a book location by section and shelf
     public boolean removeBookLocation(String section, int shelf) throws DatabaseOperationException, InvalidDataException {
         logger.info("Removing book location: Section " + section + ", Shelf " + shelf);
@@ -166,14 +143,6 @@ public class BookLocationService {
             throw new InvalidDataException("Shelf number is less than zero.");
         }
 
-    }
-
-    // Validates the book's shelf location id
-    private void validateShelfLocationId(int shelfLocationId) throws InvalidDataException {
-        if (shelfLocationId <= 0) {
-            logger.severe("Validation failed: Shelf location ID must be greater than zero.");
-            throw new InvalidDataException("Invalid shelf location ID.");
-        }
     }
 
 }

@@ -99,24 +99,6 @@ public class BookLocationDAOTest {
         assertEquals(2, allBookLocations.get(1).getShelf(), "The shelf number of the second location should be 2.");
     }
 
-    // Test for fetching the location of a book by its shelfLocationID
-    @Test
-    public void testGetLocationByBookShelfLocationID() throws DatabaseOperationException{
-        BookLocation bookLocation = new BookLocation("A", 1);
-        Optional<Integer> locationId = bookLocationDAO.addLocation(bookLocation);
-
-        assertTrue(locationId.isPresent(), "Location ID should be generated.");
-
-        BookLocation locationWithId = new BookLocation(locationId.get(), bookLocation.getSection(), bookLocation.getShelf());
-        Book book = new Book("Effective Java", "Joshua Bloch", 2018, 10, locationWithId);
-
-        Optional<BookLocation> result = bookLocationDAO.getLocationByBookShelfLocationID(book);
-
-        assertTrue(result.isPresent(), "Book location should be present.");
-        assertEquals("A", result.get().getSection(), "Section should be 'A'.");
-        assertEquals(1, result.get().getShelf(), "Shelf should be 1.");
-    }
-
     // Test for checking if there are any books stored in the specific location
     @Test
     public void testIsAnyBookInLocation() throws DatabaseOperationException {

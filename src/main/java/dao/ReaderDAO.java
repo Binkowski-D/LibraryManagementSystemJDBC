@@ -48,7 +48,7 @@ public class ReaderDAO {
 
     // Method to check if a reader exists in the database based on first name, last name, and date of birth
     public Optional<Integer> doesReaderExist(Reader reader) throws DatabaseOperationException {
-        String query = "SELECT id FROM readers WHERE first_name = ? AND last_name = ? AND date_of_birth = ?";
+        String query = "SELECT id FROM readers WHERE LOWER(first_name) = LOWER(?) AND LOWER(last_name) = LOWER(?) AND date_of_birth = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, reader.getFirstName());
@@ -91,7 +91,7 @@ public class ReaderDAO {
 
     // Fetches reader by last name
     public List<Reader> getReadersByLastName(String lastName) throws DatabaseOperationException {
-        String query = "SELECT id, first_name, last_name, date_of_birth FROM readers WHERE last_name = ? ORDER BY last_name, first_name";
+        String query = "SELECT id, first_name, last_name, date_of_birth FROM readers WHERE LOWER(last_name) = LOWER(?) ORDER BY last_name, first_name";
         List<Reader> allReaders = new ArrayList<>();
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
