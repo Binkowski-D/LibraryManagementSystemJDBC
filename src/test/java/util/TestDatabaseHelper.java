@@ -22,7 +22,7 @@ public class TestDatabaseHelper {
     public static void createBooksTable(Connection connection) throws SQLException {
         try(PreparedStatement createBooksTable = connection.prepareStatement("""
                 CREATE TABLE IF NOT EXISTS books (
-                    id INT PRIMARY KEY AUTO_INCREMENT,
+                    id SERIAL PRIMARY KEY,
                     title VARCHAR(255) NOT NULL,
                     author VARCHAR(255) NOT NULL,
                     year_of_publication INT NOT NULL,
@@ -40,7 +40,7 @@ public class TestDatabaseHelper {
     public static void createShelfLocationTable(Connection connection) throws SQLException {
         try (PreparedStatement createShelfLocationTable = connection.prepareStatement("""
                 CREATE TABLE IF NOT EXISTS book_shelf_location (
-                    id INT PRIMARY KEY AUTO_INCREMENT,
+                    id SERIAL PRIMARY KEY,
                     section VARCHAR(255) NOT NULL,
                     shelf INT NOT NULL
                 )
@@ -54,7 +54,7 @@ public class TestDatabaseHelper {
     public static void createReadersTable(Connection connection) throws SQLException {
         try (PreparedStatement createReadersTable = connection.prepareStatement("""
                 CREATE TABLE IF NOT EXISTS readers (
-                    id INT PRIMARY KEY AUTO_INCREMENT,
+                    id SERIAL PRIMARY KEY,
                     first_name VARCHAR(255) NOT NULL,
                     last_name VARCHAR(255) NOT NULL,
                     date_of_birth DATE NOT NULL
@@ -69,7 +69,7 @@ public class TestDatabaseHelper {
     public static void createBorrowedBooksTable(Connection connection) throws SQLException {
         try(PreparedStatement createBorrowedBooksTable = connection.prepareStatement("""
                 CREATE TABLE IF NOT EXISTS borrowed_books (
-                    id INT PRIMARY KEY AUTO_INCREMENT,
+                    id SERIAL PRIMARY KEY,
                     reader_id INT NOT NULL,
                     book_id INT NOT NULL,
                     borrow_date DATE NOT NULL,
