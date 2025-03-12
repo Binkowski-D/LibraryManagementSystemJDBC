@@ -6,11 +6,13 @@ import exception.DatabaseOperationException;
 import model.Book;
 import model.BookLocation;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import util.TestDatabaseHelper;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,23 +24,41 @@ public class BookDAOTest {
     private BookLocationDAO bookLocationDAO;
     private Connection connection;
 
+    @BeforeAll
+    public static void setupDatabase() throws SQLException {
+        try (Connection conn = TestDatabaseHelper.getTestConnection()) {
+            TestDatabaseHelper.createShelfLocationTable(conn);
+            TestDatabaseHelper.createBooksTable(conn);
+        }
+    }
+
     // Setting up the database connection before each test
     @BeforeEach
     public void setup() throws SQLException {
         connection = TestDatabaseHelper.getTestConnection(); // Connect to the H2 test database
-        TestDatabaseHelper.createShelfLocationTable(connection);
-        TestDatabaseHelper.createBooksTable(connection);
+        clearDatabase();
+
         bookDAO = new BookDAO(connection); // Initialize the DAO class
         bookLocationDAO = new BookLocationDAO(connection); // Initialize the BookLocation DAO class
     }
 
     @AfterEach
     public void tearDown() throws SQLException {
-        TestDatabaseHelper.dropTable(connection, "books");
-        TestDatabaseHelper.dropTable(connection, "book_shelf_location");
-
         if (connection != null && !connection.isClosed()) {
             connection.close(); // Close the database connection
+        }
+    }
+
+    private void clearDatabase() throws SQLException {
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute("SET REFERENTIAL_INTEGRITY FALSE");
+
+            stmt.executeUpdate("DELETE FROM books");
+            stmt.executeUpdate("DELETE FROM book_shelf_location");
+
+            stmt.executeUpdate("ALTER TABLE books ALTER COLUMN id RESTART WITH 1");
+
+            stmt.execute("SET REFERENTIAL_INTEGRITY TRUE");
         }
     }
 

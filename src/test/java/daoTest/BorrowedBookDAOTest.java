@@ -10,6 +10,7 @@ import model.BookLocation;
 import model.BorrowedBook;
 import model.Reader;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import util.TestDatabaseHelper;
@@ -30,14 +31,21 @@ public class BorrowedBookDAOTest {
     private Connection connection;
     private BookLocationDAO bookLocationDAO;
 
+    @BeforeAll
+    public static void setupDatabase() throws SQLException {
+        try (Connection conn = TestDatabaseHelper.getTestConnection()) {
+            TestDatabaseHelper.createShelfLocationTable(conn);
+            TestDatabaseHelper.createBooksTable(conn);
+            TestDatabaseHelper.createReadersTable(conn);
+            TestDatabaseHelper.createBorrowedBooksTable(conn);
+        }
+    }
+
     // Setting up the database connection before each test
     @BeforeEach
     public void setup() throws SQLException {
         connection = TestDatabaseHelper.getTestConnection(); // Connect to the H2 test database
-        TestDatabaseHelper.createShelfLocationTable(connection);
-        TestDatabaseHelper.createBooksTable(connection);
-        TestDatabaseHelper.createReadersTable(connection);
-        TestDatabaseHelper.createBorrowedBooksTable(connection);
+        clearDatabase();
 
         borrowedBookDAO = new BorrowedBookDAO(connection); // Initialize the DAO class
         bookDAO = new BookDAO(connection); // Initialize the DAO class
@@ -49,13 +57,21 @@ public class BorrowedBookDAOTest {
     // Cleaning up after each test by dropping the table and closing the connection
     @AfterEach
     public void tearDown() throws SQLException {
-        TestDatabaseHelper.dropTable(connection, "borrowed_books");
-        TestDatabaseHelper.dropTable(connection, "books");
-        TestDatabaseHelper.dropTable(connection, "book_shelf_location");
-        TestDatabaseHelper.dropTable(connection, "readers");
-
         if (connection != null && !connection.isClosed()) {
             connection.close();
+        }
+    }
+
+    private void clearDatabase() throws SQLException {
+        try (var stmt = connection.createStatement()) {
+            stmt.execute("SET REFERENTIAL_INTEGRITY FALSE");
+
+            stmt.executeUpdate("DELETE FROM borrowed_books");
+            stmt.executeUpdate("DELETE FROM books");
+            stmt.executeUpdate("DELETE FROM book_shelf_location");
+            stmt.executeUpdate("DELETE FROM readers");
+
+            stmt.execute("SET REFERENTIAL_INTEGRITY TRUE");
         }
     }
 

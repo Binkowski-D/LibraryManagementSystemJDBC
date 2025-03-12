@@ -5,6 +5,7 @@ import exception.InvalidDataException;
 import model.BookLocation;
 import model.BorrowedBook;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import service.BookLocationService;
@@ -31,13 +32,20 @@ public class BorrowedBookServiceTest {
     private BookLocationService bookLocationService;
     private ReaderService readerService;
 
+    @BeforeAll
+    public static void setupDatabase() throws SQLException {
+        try (Connection conn = TestDatabaseHelper.getTestConnection()) {
+            TestDatabaseHelper.createShelfLocationTable(conn);
+            TestDatabaseHelper.createBooksTable(conn);
+            TestDatabaseHelper.createReadersTable(conn);
+            TestDatabaseHelper.createBorrowedBooksTable(conn);
+        }
+    }
+
     @BeforeEach
     public void setup() throws SQLException {
         connection = TestDatabaseHelper.getTestConnection();
-        TestDatabaseHelper.createShelfLocationTable(connection);
-        TestDatabaseHelper.createBooksTable(connection);
-        TestDatabaseHelper.createReadersTable(connection);
-        TestDatabaseHelper.createBorrowedBooksTable(connection);
+        clearDatabase();
 
         borrowedBookService = new BorrowedBookService(connection);
         bookLocationService = new BookLocationService(connection);
@@ -48,13 +56,24 @@ public class BorrowedBookServiceTest {
 
     @AfterEach
     public void tearDown() throws SQLException {
-        TestDatabaseHelper.dropTable(connection, "borrowed_books");
-        TestDatabaseHelper.dropTable(connection, "books");
-        TestDatabaseHelper.dropTable(connection, "readers");
-        TestDatabaseHelper.dropTable(connection, "book_shelf_location");
-
         if (connection != null && !connection.isClosed()) {
             connection.close();
+        }
+    }
+
+    private void clearDatabase() throws SQLException {
+        try (var stmt = connection.createStatement()) {
+            stmt.execute("SET REFERENTIAL_INTEGRITY FALSE");
+
+            stmt.executeUpdate("DELETE FROM borrowed_books");
+            stmt.executeUpdate("DELETE FROM books");
+            stmt.executeUpdate("DELETE FROM readers");
+            stmt.executeUpdate("DELETE FROM book_shelf_location");
+
+            stmt.execute("ALTER TABLE readers ALTER COLUMN id RESTART WITH 1");
+            stmt.execute("ALTER TABLE books ALTER COLUMN id RESTART WITH 1");
+
+            stmt.execute("SET REFERENTIAL_INTEGRITY TRUE");
         }
     }
 

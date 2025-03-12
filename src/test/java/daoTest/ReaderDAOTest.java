@@ -4,6 +4,7 @@ import dao.ReaderDAO;
 import exception.DatabaseOperationException;
 import model.Reader;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import util.TestDatabaseHelper;
@@ -21,21 +22,38 @@ public class ReaderDAOTest {
     private ReaderDAO readerDAO;
     private Connection connection;
 
+    @BeforeAll
+    public static void setupDatabase() throws SQLException {
+        try (Connection conn = TestDatabaseHelper.getTestConnection()) {
+            TestDatabaseHelper.createReadersTable(conn);
+        }
+    }
+
     // Setting up the database connection before each test
     @BeforeEach
     public void setup() throws SQLException {
         connection = TestDatabaseHelper.getTestConnection(); // Connect to the H2 test database
-        TestDatabaseHelper.createReadersTable(connection);
+        clearDatabase();
+
         readerDAO = new ReaderDAO(connection); // Initialize the DAO class
     }
 
     // Cleaning up after each test by dropping the table and closing the connection
     @AfterEach
     public void tearDown() throws SQLException {
-        TestDatabaseHelper.dropTable(connection, "readers");
-
         if (connection != null && !connection.isClosed()) {
             connection.close();
+        }
+    }
+
+    private void clearDatabase() throws SQLException {
+        try (var stmt = connection.createStatement()) {
+            stmt.execute("SET REFERENTIAL_INTEGRITY FALSE");
+
+            stmt.executeUpdate("DELETE FROM readers");
+            stmt.executeUpdate("ALTER TABLE readers ALTER COLUMN id RESTART WITH 1");
+
+            stmt.execute("SET REFERENTIAL_INTEGRITY TRUE");
         }
     }
 

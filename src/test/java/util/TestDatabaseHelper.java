@@ -82,15 +82,4 @@ public class TestDatabaseHelper {
         }
     }
 
-    // Method to drop a table from the test database
-    public static void dropTable(Connection connection, String tableName) throws SQLException {
-        // Adding basic validation for the table name
-        if (tableName == null || tableName.trim().isEmpty()) {
-            throw new IllegalArgumentException("Table name cannot be null or empty");
-        }
-
-        try (PreparedStatement dropTable = connection.prepareStatement("DROP TABLE IF EXISTS " + tableName)) {
-            dropTable.executeUpdate();
-        }
-    }
 }

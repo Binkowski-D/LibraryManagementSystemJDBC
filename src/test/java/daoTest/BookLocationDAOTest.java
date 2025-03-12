@@ -6,6 +6,7 @@ import exception.DatabaseOperationException;
 import model.Book;
 import model.BookLocation;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import util.TestDatabaseHelper;
@@ -23,12 +24,20 @@ public class BookLocationDAOTest {
     private BookDAO bookDAO;
     private Connection connection;
 
+    @BeforeAll
+    public static void setupDatabase() throws SQLException {
+        try (Connection conn = TestDatabaseHelper.getTestConnection()) {
+            TestDatabaseHelper.createShelfLocationTable(conn);
+            TestDatabaseHelper.createBooksTable(conn);
+        }
+    }
+
     // Setting up the database connection before each test
     @BeforeEach
     public void setup() throws SQLException {
         connection = TestDatabaseHelper.getTestConnection(); // Connect to the H2 test database
-        TestDatabaseHelper.createShelfLocationTable(connection);
-        TestDatabaseHelper.createBooksTable(connection);
+        clearDatabase();
+
         bookLocationDAO = new BookLocationDAO(connection); // Initialize the DAO class
         bookDAO = new BookDAO(connection);
     }
@@ -36,11 +45,19 @@ public class BookLocationDAOTest {
     // Cleaning up after each test by dropping the table and closing the connection
     @AfterEach
     public void tearDown() throws SQLException {
-        TestDatabaseHelper.dropTable(connection, "books");
-        TestDatabaseHelper.dropTable(connection, "book_shelf_location");
-
         if (connection != null && !connection.isClosed()) {
             connection.close();
+        }
+    }
+
+    private void clearDatabase() throws SQLException {
+        try (var stmt = connection.createStatement()) {
+            stmt.execute("SET REFERENTIAL_INTEGRITY FALSE");
+
+            stmt.executeUpdate("DELETE FROM books");
+            stmt.executeUpdate("DELETE FROM book_shelf_location");
+
+            stmt.execute("SET REFERENTIAL_INTEGRITY TRUE");
         }
     }
 
